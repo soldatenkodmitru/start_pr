@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D8689C532E7231E7008F7331 /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = D8689C522E7231E7008F7331 /* SDWebImage */; };
+		D8689C562E72322D008F7331 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = D8689C552E72322D008F7331 /* SDWebImageSwiftUI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		CB3540482E53764C000E1DD6 /* TestForInterview.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TestForInterview.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +41,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D8689C562E72322D008F7331 /* SDWebImageSwiftUI in Frameworks */,
+				D8689C532E7231E7008F7331 /* SDWebImage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +85,8 @@
 			);
 			name = TestForInterview;
 			packageProductDependencies = (
+				D8689C522E7231E7008F7331 /* SDWebImage */,
+				D8689C552E72322D008F7331 /* SDWebImageSwiftUI */,
 			);
 			productName = TestForInterview;
 			productReference = CB3540482E53764C000E1DD6 /* TestForInterview.app */;
@@ -107,6 +116,10 @@
 			);
 			mainGroup = CB35403F2E53764C000E1DD6;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D8689C512E7231E7008F7331 /* XCRemoteSwiftPackageReference "SDWebImage" */,
+				D8689C542E72322D008F7331 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CB3540492E53764C000E1DD6 /* Products */;
 			projectDirPath = "";
@@ -145,7 +158,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = U8C8RY55WR;
+				DEVELOPMENT_TEAM = AVHG9V7Y3H;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TestForInterview/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -153,7 +166,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -178,7 +191,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = U8C8RY55WR;
+				DEVELOPMENT_TEAM = AVHG9V7Y3H;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TestForInterview/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -186,7 +199,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -345,6 +358,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D8689C512E7231E7008F7331 /* XCRemoteSwiftPackageReference "SDWebImage" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImage.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.21.2;
+			};
+		};
+		D8689C542E72322D008F7331 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D8689C522E7231E7008F7331 /* SDWebImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D8689C512E7231E7008F7331 /* XCRemoteSwiftPackageReference "SDWebImage" */;
+			productName = SDWebImage;
+		};
+		D8689C552E72322D008F7331 /* SDWebImageSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D8689C542E72322D008F7331 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			productName = SDWebImageSwiftUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CB3540402E53764C000E1DD6 /* Project object */;
 }

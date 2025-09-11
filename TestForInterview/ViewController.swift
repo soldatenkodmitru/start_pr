@@ -37,7 +37,7 @@ final class MovieListViewModel {
     private let concurrentQueue = DispatchQueue(label: "MovieListViewModel.fetch.queue", attributes: .concurrent)
 
     // Expose read-only list to the ViewController
-    private(set) var movies: [Movies] = [] { didSet { onUpdate?() } }
+    private(set) var movies: [MovieListItem] = [] { didSet { onUpdate?() } }
 
     private let favoritesStore = FavoritesStore()
     private(set) var favoriteIds: Set<Int>
@@ -50,11 +50,11 @@ final class MovieListViewModel {
     // Bindable callback for the View (ViewController)
     var onUpdate: (() -> Void)?
     
-    func isFavorite(_ movie: Movies) -> Bool {
+    func isFavorite(_ movie: MovieListItem) -> Bool {
         return favoriteIds.contains(movie.id)
     }
 
-    func toggleFavorite(_ movie: Movies) {
+    func toggleFavorite(_ movie: MovieListItem) {
         if favoriteIds.contains(movie.id) {
             favoriteIds.remove(movie.id)
         } else {
@@ -93,7 +93,7 @@ final class MovieListViewModel {
         pagesToLoad.forEach { inFlightPages.insert($0) }
 
         let group = DispatchGroup()
-        var collected: [(page: Int, items: [Movies], total: Int?)] = []
+        var collected: [(page: Int, items: [MovieListItem], total: Int?)] = []
 
         for page in pagesToLoad {
             group.enter()
@@ -151,7 +151,7 @@ final class MovieListViewModel {
         }
     }
 
-    func movie(at index: Int) -> Movies { movies[index] }
+    func movie(at index: Int) -> MovieListItem { movies[index] }
     var count: Int { movies.count }
 }
 
@@ -183,6 +183,7 @@ class ViewController: UIViewController {
     // MARK: - Search
     private let searchController = UISearchController(searchResultsController: nil)
     private var searchDebounceTimer: Timer?
+    private var isSearchVisible = false
     
     // MARK: - Filtering (All / Favorites)
     public enum FilterMode { case all, favorites }
@@ -192,7 +193,7 @@ class ViewController: UIViewController {
         return btn
     }()
 
-    private var currentMovies: [Movies] {
+    private var currentMovies: [MovieListItem] {
         switch filterMode {
         case .all:
             return viewModel.movies
@@ -226,14 +227,20 @@ class ViewController: UIViewController {
             target: self,
             action: #selector(toggleTheme)
         )
-        navigationItem.rightBarButtonItems = [themeButton, filterButton]
+        let searchButton = UIBarButtonItem(
+            image: UIImage(systemName: "magnifyingglass"),
+            style: .plain,
+            target: self,
+            action: #selector(toggleSearchBar)
+        )
+        navigationItem.rightBarButtonItems = [themeButton, filterButton, searchButton]
         
         // Search Controller
         searchController.searchResultsUpdater = self
         searchController.searchBar.delegate = self
         searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "Search movies"
-        navigationItem.searchController = searchController
+        searchController.searchBar.placeholder = "Search movies (minimum 3 symbols)"
+        navigationItem.hidesSearchBarWhenScrolling = true
         definesPresentationContext = true
 
         title = "Movies"
@@ -296,6 +303,25 @@ class ViewController: UIViewController {
         filterButton.title = (filterMode == .all) ? "All" : "Favs"
         collectionView.reloadData()
     }
+    
+    @objc private func toggleSearchBar() {
+        isSearchVisible.toggle()
+        if isSearchVisible {
+            // Attach to nav bar and show immediately
+            navigationItem.searchController = searchController
+            navigationItem.hidesSearchBarWhenScrolling = false
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.searchController.isActive = true
+                self.searchController.searchBar.becomeFirstResponder()
+            }
+        } else {
+            // Deactivate and remove
+            searchController.isActive = false
+            searchController.searchBar.resignFirstResponder()
+            navigationItem.searchController = nil
+        }
+    }
 
     func applyFilterMode(_ mode: FilterMode) {
         filterMode = mode
@@ -341,46 +367,26 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
 
 // MARK: - UICollectionViewDataSource
 
+
 extension ViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return currentMovies.count
+        return viewModel.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: kDefaultCellId, for: indexPath) as! MovieCell
-        
-        cell.backgroundColor = indexPath.item % 2 == 0 ? .lightGray : .red.withAlphaComponent(0.3)
-        
-        let movie = currentMovies[indexPath.row]
-        cell.configure(with: movie)
-
-        // Add/Update star icon overlay (no title prefix) for favorites
-        let tag = 999
-        let isFav = viewModel.isFavorite(movie)
-        let starView: UIImageView
-        if let existing = cell.contentView.viewWithTag(tag) as? UIImageView {
-            starView = existing
-        } else {
-            let iv = UIImageView(image: UIImage(systemName: "star.fill"))
-            iv.translatesAutoresizingMaskIntoConstraints = false
-            iv.tintColor = .systemYellow
-            iv.tag = tag
-            cell.contentView.addSubview(iv)
-            NSLayoutConstraint.activate([
-                iv.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 6),
-                iv.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -6),
-                iv.widthAnchor.constraint(equalToConstant: 18),
-                iv.heightAnchor.constraint(equalToConstant: 18)
-            ])
-            starView = iv
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MovieCellId", for: indexPath) as? MovieCell else {
+            return UICollectionViewCell()
         }
-        starView.isHidden = !isFav
-    
+        
+        let movieItem = viewModel.movie(at: indexPath.row)
+        cell.configure(with: movieItem)
         
         return cell
     }
+
+
     
     
     func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
@@ -413,7 +419,7 @@ extension ViewController: UICollectionViewDelegate {
     }
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        // Only prefetch when showing the full catalog (not filtered favorites or active search)
+        // Only prefetch when showing the full catalog (not filtered favorites or active )
         let isShowingAll = (filterMode == .all)
         let isSearching = !(searchController.searchBar.text?.isEmpty ?? true)
         if isShowingAll && !isSearching {
@@ -438,6 +444,12 @@ extension ViewController: UISearchResultsUpdating, UISearchBarDelegate {
 
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         viewModel.fetchPopularMovies()
+        isSearchVisible = false
+            UIView.animate(withDuration: 0.25) { [weak self] in
+                guard let self = self else { return }
+                self.navigationItem.searchController = nil
+                self.view.layoutIfNeeded()
+            }
     }
 }
 
@@ -450,3 +462,5 @@ final class FavoritesViewController: ViewController {
         applyFilterMode(.favorites)
     }
 }
+
+    

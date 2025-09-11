@@ -9,7 +9,7 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct MovieDetailView: View {
-    let movie: Movies
+    let movie: MovieListItem
 
     var body: some View {
         ScrollView {

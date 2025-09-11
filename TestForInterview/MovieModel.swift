@@ -21,4 +21,17 @@ struct MovieListItem : Decodable {
     let poster_path : String
     let vote_average : Double
     let release_date : String
+    
+    // Non-decoded property for favorites functionality
+    var isFavorite: Bool = false
+    
+    // Custom CodingKeys to exclude isFavorite from decoding
+    enum CodingKeys: String, CodingKey {
+        case id
+        case original_title
+        case overview
+        case poster_path
+        case vote_average
+        case release_date
+    }
 }

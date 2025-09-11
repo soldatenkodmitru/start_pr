@@ -155,6 +155,30 @@ final class MovieListViewModel {
     var count: Int { movies.count }
 }
 
+extension MovieListViewModel {
+    func updateMovieWithFavoriteStatus(_ updatedMovie: MovieListItem) {
+        if let index = movies.firstIndex(where: { $0.id == updatedMovie.id }) {
+            movies[index] = updatedMovie
+            // Update favorites store
+            if updatedMovie.isFavorite {
+                favoriteIds.insert(updatedMovie.id)
+            } else {
+                favoriteIds.remove(updatedMovie.id)
+            }
+            favoritesStore.save(favoriteIds)
+            onUpdate?()
+        }
+    }
+    
+    func applyFavoriteStatus(to movies: [MovieListItem]) -> [MovieListItem] {
+        return movies.map { movie in
+            var updatedMovie = movie
+            updatedMovie.isFavorite = favoriteIds.contains(movie.id)
+            return updatedMovie
+        }
+    }
+}
+
 fileprivate let kDefaultCellId = "MovieCellId"
 
 class ViewController: UIViewController {
@@ -371,7 +395,7 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
 extension ViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel.count
+        return currentMovies.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -380,9 +404,14 @@ extension ViewController: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
         
-        let movieItem = viewModel.movie(at: indexPath.row)
-        cell.configure(with: movieItem)
+        var movieItem = viewModel.movie(at: indexPath.row)
+                // Apply current favorite status
+        movieItem.isFavorite = viewModel.isFavorite(movieItem)
         
+        cell.configure(with: movieItem) { [weak self] updatedMovie in
+            self?.viewModel.updateMovieWithFavoriteStatus(updatedMovie)
+        }
+
         return cell
     }
 

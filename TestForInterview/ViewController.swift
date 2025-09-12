@@ -185,7 +185,7 @@ class ViewController: UIViewController {
 
     // MARK: - IBOutlets
     
-    @IBOutlet private weak var collectionView: UICollectionView!
+    @IBOutlet public weak var collectionView: UICollectionView!
     
     // Center loader for initial load
     private let loadingIndicator: UIActivityIndicatorView = {
@@ -269,25 +269,7 @@ class ViewController: UIViewController {
 
         title = "Movies"
         tabBarItem = UITabBarItem(title: "Movies", image: UIImage(systemName: "film"), selectedImage: UIImage(systemName: "film.fill"))
-        
-        if let tbc = self.tabBarController {
-            // Append Favorites tab if it's not already present
-            let alreadyHasFavorites = (tbc.viewControllers ?? []).contains { vc in
-                if let nav = vc as? UINavigationController {
-                    return nav.topViewController is FavoritesViewController
-                }
-                return vc is FavoritesViewController
-            }
-            if !alreadyHasFavorites {
-                let favVC = FavoritesViewController()
-                favVC.title = "Favorites"
-                favVC.tabBarItem = UITabBarItem(title: "Favorites", image: UIImage(systemName: "star"), selectedImage: UIImage(systemName: "star.fill"))
-                let favNav = UINavigationController(rootViewController: favVC)
-                var vcs = tbc.viewControllers ?? []
-                vcs.append(favNav)
-                tbc.setViewControllers(vcs, animated: false)
-            }
-        }
+
     }
 
     // MARK: - UI Setup
@@ -414,23 +396,6 @@ extension ViewController: UICollectionViewDataSource {
 
         return cell
     }
-
-
-    
-    
-    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
-        let movie = currentMovies[indexPath.row]
-        let isFav = viewModel.isFavorite(movie)
-        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
-            let title = isFav ? "Remove from Favorites" : "Add to Favorites"
-            let imageName = isFav ? "star.slash" : "star"
-            let toggle = UIAction(title: title, image: UIImage(systemName: imageName)) { [weak self] _ in
-                self?.viewModel.toggleFavorite(movie)
-            }
-            return UIMenu(title: "", children: [toggle])
-        }
-    }
-    
 }
 
 // MARK: - UICollectionViewDelegate
@@ -485,9 +450,11 @@ extension ViewController: UISearchResultsUpdating, UISearchBarDelegate {
 
 // MARK: - Favorites as Collection (inherits ViewController)
 final class FavoritesViewController: ViewController {
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Favorites"
+        tabBarItem = UITabBarItem(title: "Favorites", image: UIImage(systemName: "star"), selectedImage: UIImage(systemName: "star.fill"))
         applyFilterMode(.favorites)
     }
 }
